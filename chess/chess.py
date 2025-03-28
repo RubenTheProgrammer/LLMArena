@@ -10,6 +10,28 @@ class ChessGame:
         self.current_player = 2 if player_color == "black" else 1
         self.player_color = player_color
         self.board_status = self.initialize_pieces()
+        self.board_size = 8
+
+
+    def __str__(self) -> str:
+        board_repr = ""
+        bottom_row = " "
+        for j in range(1, self.board_size + 1):
+            cur_row = f"{j}  "
+            for i in range(1, self.board_size + 1):
+                letter = ChessCell.index_to_letter[i]
+                if j == 1:
+                    bottom_row += f" {letter}"
+                pos = f"{letter}{j}"
+                piece = self.board_status.get(pos)
+                if piece is None:
+                    cur_row += " ·"
+                else:
+                    cur_row += f" {piece.symbol}"
+            board_repr = f"{cur_row}\n" + board_repr
+        return board_repr + f"  {bottom_row}"
+
+
 
 
     def initialize_pieces(self):
@@ -62,15 +84,22 @@ class ChessGame:
             return False
 
         # Validate piece movement
+        # trajectory = piece.move(
+        # if trajectory is not None
+        # controlla se la traiettoria e libera se il pezzo non e un cavallo
         if not piece.move(start_cell, end_cell):
             print(f"Invalid move for {piece}!")
             return False
+
+        #is_valid = self.validate_move(piece, start_cell, end_cell, trajectory)
 
         # Move the piece
         self.board_status[end_cell_str] = piece
         del self.board_status[start_cell_str]
 
+        piece.moved(start_cell, end_cell)
         print(f"Player {self.current_player} plays: {move}")
+        print(str(self))
         self.turn_count += 1
         self.current_player = 2 if self.current_player == 1 else 1
         return True
@@ -108,7 +137,7 @@ class GameController:
     def __init__(self):
         self.game = None
         self.player_interactor = None
-        self.players = {1: None, 2: None}
+        self.players = {}
 
     def ask_user(self):
         # Which game?
@@ -149,6 +178,7 @@ class GameController:
             return
 
         turn_count = 1
+        print(str(self.game))
         while turn_count < self.game.max_turns:
             print(f"\n--- Turn {turn_count} ---")
             move = self.player_interactor.interact(self.game.current_player)
