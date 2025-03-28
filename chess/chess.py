@@ -6,9 +6,11 @@ class ChessGame:
     def __init__(self, max_turns, player_color):
         self.max_turns = max_turns
         self.turn_count = 0
-        self.current_player = 1  # 1 = white, 2 = black
+        # Modify initial current_player based on player's color choice
+        self.current_player = 2 if player_color == "black" else 1
         self.player_color = player_color
         self.board_status = self.initialize_pieces()
+
 
     def initialize_pieces(self):
         # Using the actual piece classes from pieces.py
@@ -48,9 +50,15 @@ class ChessGame:
         piece = self.board_status[start_cell_str]
 
         # Validate piece color matches current player
-        current_player_color = "white" if self.current_player == 1 else "black"
+        if self.player_color == "white":
+            # If player is white, 1 is white, 2 is black
+            current_player_color = "white" if self.current_player == 1 else "black"
+        else:
+            # If player is black, 1 is black, 2 is white
+            current_player_color = "black" if self.current_player == 1 else "white"
+
         if piece.color.lower() != current_player_color:
-            print(f"You can only move {current_player_color} pieces!")
+            print(f"Player {self.current_player} can only move {current_player_color} pieces!")
             return False
 
         # Validate piece movement
@@ -85,7 +93,7 @@ class ChessGame:
         return True
 
 
-# Game setup and controller remain the same
+# Define games dictionary after ChessGame class
 games = {"chess": ChessGame}
 player_color = ["white", "black"]
 
@@ -106,19 +114,40 @@ class GameController:
         # Which game?
         game = input("Which game? (chess): ").strip().lower()
         if game in games:
-            turns = int(input("How many turns? "))
+            turns_input = input("How many turns? ")
+
+            # Validate turns input
+            if not turns_input.isnumeric():
+                print("Not a valid amount of turns!")
+                return False
+
+            turns = int(turns_input)
+
+            # Check if turns are within acceptable range
+            if turns > 50:
+                print("Not a valid amount of turns!")
+                return False
+
             color_choice = input("Do you want to be White or Black? ").strip().lower()
             if color_choice in player_color:
                 self.players[1] = color_choice
                 self.players[2] = "black" if color_choice == "white" else "white"
                 self.game = games[game](turns, color_choice)
                 self.player_interactor = PlayerInteractor()
+                return True
             else:
                 print("Color not recognized!")
+                return False
         else:
             print("Game not recognized!")
+            return False
 
     def play(self):
+        # Only start the game if ask_user() was successful
+        if self.game is None:
+            print("Please start a valid game first.")
+            return
+
         turn_count = 1
         while turn_count < self.game.max_turns:
             print(f"\n--- Turn {turn_count} ---")
@@ -131,5 +160,5 @@ class GameController:
 # Start game
 if __name__ == "__main__":
     controller = GameController()
-    controller.ask_user()
-    controller.play()
+    if controller.ask_user():
+        controller.play()
