@@ -77,21 +77,34 @@ class ChessGame:
             current_player_color = "white" if self.current_player == 1 else "black"
         else:
             # If player is black, 1 is black, 2 is white
-            current_player_color = "black" if self.current_player == 1 else "white"
+            current_player_color = "black" if self.current_player == 1 else "black"
 
         if piece.color.lower() != current_player_color:
             print(f"Player {self.current_player} can only move {current_player_color} pieces!")
             return False
 
-        # Validate piece movement
-        # trajectory = piece.move(
-        # if trajectory is not None
-        # controlla se la traiettoria e libera se il pezzo non e un cavallo
-        if not piece.move(start_cell, end_cell):
+        # Check if the destination has a piece and if it's a friendly piece
+        if end_cell_str in self.board_status:
+            target_piece = self.board_status[end_cell_str]
+            if target_piece.color == piece.color:
+                print(f"Cannot capture your own {target_piece}!")
+                return False
+            eating = True
+        else:
+            eating = False
+
+        # Knights can jump over pieces, so only check the destination
+        if piece.piece_type != "knight":
+            # Check if the path is clear
+            path = self._get_path(start_cell, end_cell)
+            if path and not self._is_path_clear(path):
+                print(f"Path is blocked for {piece}!")
+                return False
+
+        # Validate piece movement with eating information for pawns
+        if not piece.move(start_cell, end_cell, eating=eating):
             print(f"Invalid move for {piece}!")
             return False
-
-        #is_valid = self.validate_move(piece, start_cell, end_cell, trajectory)
 
         # Move the piece
         self.board_status[end_cell_str] = piece
@@ -102,6 +115,38 @@ class ChessGame:
         print(str(self))
         self.turn_count += 1
         self.current_player = 2 if self.current_player == 1 else 1
+        return True
+
+    def _get_path(self, start: ChessCell, end: ChessCell):
+        """Generate a list of cells in the path from start to end (excluding start and end)"""
+        path = []
+        di, dj = end.dist(start)
+
+        # Determine direction
+        step_i = 0 if di == 0 else (1 if di > 0 else -1)
+        step_j = 0 if dj == 0 else (1 if dj > 0 else -1)
+
+        # If it's a knight move, there's no path to check
+        if abs(di) > 0 and abs(dj) > 0 and abs(di) != abs(dj):
+            return []
+
+        # Calculate number of steps
+        steps = max(abs(di), abs(dj))
+
+        # Generate each cell in the path
+        for step in range(1, steps):
+            cell_i = start.i + step * step_i
+            cell_j = start.j + step * step_j
+            cell_str = f"{ChessCell.index_to_letter[cell_i]}{cell_j}"
+            path.append(cell_str)
+
+        return path
+
+    def _is_path_clear(self, path):
+        """Check if all cells in the path are empty"""
+        for cell in path:
+            if cell in self.board_status:
+                return False
         return True
 
     def _validate_move_format(self, move):
