@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from cells import ChessCell
 
@@ -83,7 +85,9 @@ class ChessGame:
             print(f"Player {self.current_player} can only move {current_player_color} pieces!")
             return False
 
+
         # Check if the destination has a piece and if it's a friendly piece
+        # TODO Make a list that contains all the eaten pieces and of which color
         if end_cell_str in self.board_status:
             target_piece = self.board_status[end_cell_str]
             if target_piece.color == piece.color:
@@ -106,9 +110,17 @@ class ChessGame:
             print(f"Invalid move for {piece}!")
             return False
 
-        # Move the piece
+        # Move the piece if does not end in a check
+        # We don't care if we were in check in practice
+        pre_move_status = deepcopy(self.board_status)
+        # Simulate move
         self.board_status[end_cell_str] = piece
         del self.board_status[start_cell_str]
+        if self.is_in_check(self.current_player):
+            # TODO add self.is_in_checkmate and if is True then return None and end game with winner
+            self.board_status = pre_move_status
+            print("Move leaves you in check!")
+            return False
 
         piece.moved(start_cell, end_cell)
         print(f"Player {self.current_player} plays: {move}")
@@ -126,7 +138,8 @@ class ChessGame:
         step_i = 0 if di == 0 else (1 if di > 0 else -1)
         step_j = 0 if dj == 0 else (1 if dj > 0 else -1)
 
-        # If it's a knight move, there's no path to check
+        # If it's a knight move, there's no path to check,
+        # TODO add so it checks piece if it's a horse make it return []
         if abs(di) > 0 and abs(dj) > 0 and abs(di) != abs(dj):
             return []
 
@@ -172,6 +185,8 @@ games = {"chess": ChessGame}
 player_color = ["white", "black"]
 
 
+# TODO turn this into generic player class and then make subclasses like in pieces such as regular player and ai player
+#  with a custom prompt where you give a format board status to the ai in a JSON
 class PlayerInteractor:
     def interact(self, player):
         move = input(f"Player {player}, enter your move (e.g., 'e2-e4'): ")
@@ -228,6 +243,7 @@ class GameController:
             print(f"\n--- Turn {turn_count} ---")
             move = self.player_interactor.interact(self.game.current_player)
             if self.game.play_move(move):
+
                 turn_count += 1
         print("Game over after", self.game.max_turns, "turns")
 
