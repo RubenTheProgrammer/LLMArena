@@ -8,11 +8,12 @@ class ChessGame:
     def __init__(self, max_turns, player_color):
         self.max_turns = max_turns
         self.turn_count = 0
-        # Modify initial current_player based on player's color choice
+        #modify initial current_player based on player's color choice
         self.current_player = 2 if player_color == "black" else 1
         self.player_color = player_color
         self.board_status = self.initialize_pieces()
         self.board_size = 8
+        self.captured_pieces = {"white": [], "black": []}
 
 
     def __str__(self) -> str:
@@ -37,7 +38,7 @@ class ChessGame:
 
 
     def initialize_pieces(self):
-        # Using the actual piece classes from pieces.py
+        #using the actual piece classes from pieces.py
         pieces = {
             "a1": Rook("white"), "b1": Knight("white"), "c1": Bishop("white"),
             "d1": Queen("white"), "e1": King("white"), "f1": Bishop("white"),
@@ -56,68 +57,75 @@ class ChessGame:
         return pieces
 
     def play_move(self, move):
-        # More robust move validation
+
+        #more robust move validation
         if not self._validate_move_format(move):
             print(f"Move '{move}' is not valid!")
             return False
 
-        # Parse move
+        #parse move
         start_cell_str, end_cell_str = move.split('-')
         start_cell = ChessCell(start_cell_str)
         end_cell = ChessCell(end_cell_str)
 
-        # Check if a piece exists at the start cell
+        #check if a piece exists at the start cell
         if start_cell_str not in self.board_status:
             print(f"No piece at {start_cell_str}!")
             return False
 
         piece = self.board_status[start_cell_str]
 
-        # Validate piece color matches current player
+        # validate piece color matches current player
         if self.player_color == "white":
-            # If player is white, 1 is white, 2 is black
+            #if player is white, 1 is white, 2 is black
             current_player_color = "white" if self.current_player == 1 else "black"
         else:
-            # If player is black, 1 is black, 2 is white
-            current_player_color = "black" if self.current_player == 1 else "black"
+            #if player is black, 1 is black, 2 is white
+            current_player_color = "black" if self.current_player == 1 else "white"
 
         if piece.color.lower() != current_player_color:
             print(f"Player {self.current_player} can only move {current_player_color} pieces!")
             return False
 
-
-        # Check if the destination has a piece and if it's a friendly piece
-        # TODO Make a list that contains all the eaten pieces and of which color
         if end_cell_str in self.board_status:
             target_piece = self.board_status[end_cell_str]
             if target_piece.color == piece.color:
                 print(f"Cannot capture your own {target_piece}!")
                 return False
+            #add the captured piece to the appropriate list
+            self.captured_pieces[target_piece.color].append(target_piece)
             eating = True
         else:
             eating = False
 
-        # Knights can jump over pieces, so only check the destination
+        #knights can jump over pieces, so only check the destination
         if piece.piece_type != "knight":
-            # Check if the path is clear
+            # check if the path is clear
             path = self._get_path(start_cell, end_cell)
             if path and not self._is_path_clear(path):
                 print(f"Path is blocked for {piece}!")
                 return False
 
-        # Validate piece movement with eating information for pawns
+        #validate piece movement with eating information for pawns
         if not piece.move(start_cell, end_cell, eating=eating):
             print(f"Invalid move for {piece}!")
             return False
 
-        # Move the piece if does not end in a check
-        # We don't care if we were in check in practice
+        #move the piece if does not end in a check
         pre_move_status = deepcopy(self.board_status)
-        # Simulate move
+
+        #simulate move
         self.board_status[end_cell_str] = piece
         del self.board_status[start_cell_str]
         if self.is_in_check(self.current_player):
-            # TODO add self.is_in_checkmate and if is True then return None and end game with winner
+            #add checkmate check
+            if self.is_in_checkmate(self.current_player):
+                winner = 2 if self.current_player == 1 else 1
+                winner_color = "White" if (self.player_color == "white" and winner == 1) or \
+                                          (self.player_color == "black" and winner == 2) else "Black"
+                self.board_status = pre_move_status
+                print(f"Checkmate! {winner_color} wins!")
+                return None  # Indicate game over
             self.board_status = pre_move_status
             print("Move leaves you in check!")
             return False
@@ -130,46 +138,44 @@ class ChessGame:
         return True
 
     def _get_path(self, start: ChessCell, end: ChessCell):
-        """Generate a list of cells in the path from start to end (excluding start and end)"""
         path = []
         di, dj = end.dist(start)
 
-        # Determine direction
+        #determine direction
         step_i = 0 if di == 0 else (1 if di > 0 else -1)
         step_j = 0 if dj == 0 else (1 if dj > 0 else -1)
 
-        # If it's a knight move, there's no path to check,
-        # TODO add so it checks piece if it's a horse make it return []
-        if abs(di) > 0 and abs(dj) > 0 and abs(di) != abs(dj):
-            return []
-
-        # Calculate number of steps
+        #calculate number of steps
         steps = max(abs(di), abs(dj))
 
-        # Generate each cell in the path
+        #generate each cell in the path
         for step in range(1, steps):
             cell_i = start.i + step * step_i
             cell_j = start.j + step * step_j
+
+            #verify cell is within board boundaries
+            if cell_i < 1 or cell_i > 8 or cell_j < 1 or cell_j > 8:
+                continue  #skip this cell if it's outside the board
+
             cell_str = f"{ChessCell.index_to_letter[cell_i]}{cell_j}"
             path.append(cell_str)
 
         return path
 
     def _is_path_clear(self, path):
-        """Check if all cells in the path are empty"""
         for cell in path:
             if cell in self.board_status:
                 return False
         return True
 
     def _validate_move_format(self, move):
-        # Validate move format
+        #validate move format
         if len(move) != 5 or move[2] != '-':
             return False
 
         start_cell, end_cell = move.split('-')
 
-        # Validate cell format
+        #validate cell format
         if (len(start_cell) != 2 or len(end_cell) != 2 or
                 start_cell[0] not in 'abcdefgh' or end_cell[0] not in 'abcdefgh' or
                 not start_cell[1].isdigit() or not end_cell[1].isdigit() or
@@ -179,50 +185,214 @@ class ChessGame:
 
         return True
 
+    def is_in_check(self, player):
+        # first, find the king
+        player_color = "white" if self.player_color == "white" and player == 1 else "black"
+        player_color = "black" if self.player_color == "white" and player == 2 else player_color
+        player_color = "white" if self.player_color == "black" and player == 2 else player_color
+        player_color = "black" if self.player_color == "black" and player == 1 else player_color
+
+        king_position = None
+        for pos, piece in self.board_status.items():
+            if piece.piece_type == "king" and piece.color == player_color:
+                king_position = pos
+                break
+
+        if not king_position:
+            return False  # no king found (shouldn't happen in normal chess)
+
+        # check if any opponent piece can capture the king
+        opponent_color = "black" if player_color == "white" else "white"  # color of the opponent's pieces
+        king_cell = ChessCell(king_position)  # the cell where the king is located
+
+        for pos, piece in self.board_status.items():
+            if piece.color != opponent_color:
+                continue
+
+            start_cell = ChessCell(pos)
+
+            # knights can jump, so no need to check path for them
+            if piece.piece_type == "knight":
+                if piece.move(start_cell, king_cell, eating=True):
+                    return True
+            else:
+                # for other pieces, check both the move validity and path clearance
+                if piece.move(start_cell, king_cell, eating=True):
+                    path = self._get_path(start_cell, king_cell)
+                    if self._is_path_clear(path):
+                        return True
+
+        # only return False after checking all opponent pieces
+        return False
+
+    def is_in_checkmate(self, player):
+        #if not in check, not in checkmate
+        if not self.is_in_check(player):
+            return False
+
+        #get player color
+        player_color = "white" if self.player_color == "white" and player == 1 else "black"
+        player_color = "black" if self.player_color == "white" and player == 2 else player_color
+        player_color = "white" if self.player_color == "black" and player == 2 else player_color
+        player_color = "black" if self.player_color == "black" and player == 1 else player_color
+
+        #try all possible moves for all pieces of the player
+        for start_pos, piece in list(self.board_status.items()):
+            if piece.color != player_color:
+                continue
+
+            start_cell = ChessCell(start_pos)
+
+            #try all possible destination cells
+            for i in range(1, 9):
+                for j in range(1, 9):
+                    end_pos = f"{ChessCell.index_to_letter[i]}{j}"
+                    if end_pos == start_pos:
+                        continue
+
+                    end_cell = ChessCell(end_pos)
+
+                    #check if piece can move there (ignoring check for now)
+                    eating = end_pos in self.board_status
+                    if eating and self.board_status[end_pos].color == player_color:
+                        continue  #can't capture own piece
+
+                    #for non-knights, need to check path clearance
+                    if piece.piece_type != "knight":
+                        path = self._get_path(start_cell, end_cell)
+                        if path and not self._is_path_clear(path):
+                            continue
+
+                    if not piece.move(start_cell, end_cell, eating=eating):
+                        continue
+
+                    #see if move gets out of check
+                    pre_move_status = deepcopy(self.board_status)
+                    captured_piece = None
+
+                    if end_pos in self.board_status:
+                        captured_piece = self.board_status[end_pos]
+
+                    self.board_status[end_pos] = piece
+                    del self.board_status[start_pos]
+
+                    still_in_check = self.is_in_check(player)
+
+                    # Restore the board
+                    self.board_status = pre_move_status
+
+                    if not still_in_check:
+                        return False  #found a move that escapes check
+
+        return True  #no moves escape check, so it's checkmate
+
 
 # Define games dictionary after ChessGame class
 games = {"chess": ChessGame}
 player_color = ["white", "black"]
 
 
-# TODO turn this into generic player class and then make subclasses like in pieces such as regular player and ai player
-#  with a custom prompt where you give a format board status to the ai in a JSON
-class PlayerInteractor:
-    def interact(self, player):
-        move = input(f"Player {player}, enter your move (e.g., 'e2-e4'): ")
+class Player:
+    #base class
+
+    def __init__(self, player_number, color):
+        self.player_number = player_number
+        self.color = color
+
+    def get_move(self, board_status):
+        raise NotImplementedError
+
+    def notify_move(self, move, board_status):
+        pass
+
+
+class HumanPlayer(Player):
+    #human player
+
+    def get_move(self, board_status):
+        move = input(f"Player {self.player_number} ({self.color}), enter your move (e.g., 'e2-e4'): ")
         return move
+
+
+class AIPlayer(Player):
+    #ai player
+
+    def get_move(self, board_status):
+        print(f"AI Player {self.player_number} ({self.color}) is thinking...")
+
+        #convert board_status to JSON format for the AI
+        board_json = {}
+        for pos, piece in board_status.items():
+            board_json[pos] = {
+                "type": piece.piece_type,
+                "color": piece.color
+            }
+
+        #here call ai to move
+
 
 
 class GameController:
     def __init__(self):
         self.game = None
-        self.player_interactor = None
         self.players = {}
 
     def ask_user(self):
-        # Which game?
+        #which game?
         game = input("Which game? (chess): ").strip().lower()
         if game in games:
             turns_input = input("How many turns? ")
 
-            # Validate turns input
+            #validate turns input
             if not turns_input.isnumeric():
                 print("Not a valid amount of turns!")
                 return False
 
             turns = int(turns_input)
 
-            # Check if turns are within acceptable range
+            #check if turns are within acceptable range
             if turns > 50:
                 print("Not a valid amount of turns!")
                 return False
 
-            color_choice = input("Do you want to be White or Black? ").strip().lower()
+            color_choice = input("What color should Player 1 be? ").strip().lower()
             if color_choice in player_color:
-                self.players[1] = color_choice
-                self.players[2] = "black" if color_choice == "white" else "white"
+                #create the game
                 self.game = games[game](turns, color_choice)
-                self.player_interactor = PlayerInteractor()
+
+                #ask about player types for both players
+                player2_color = "black" if color_choice == "white" else "white"
+
+                #validate player type inputs
+                valid_player_types = ["human", "ai"]
+
+                #get and validate player 1 type
+                player1_type = ""
+                while player1_type not in valid_player_types:
+                    player1_type = input(
+                        f"Player 1 ({color_choice.capitalize()}): Human or AI? (human/ai): ").strip().lower()
+                    if player1_type not in valid_player_types:
+                        print("Invalid player type! Please enter 'human' or 'ai'.")
+
+                #get and validate player 2 type
+                player2_type = ""
+                while player2_type not in valid_player_types:
+                    player2_type = input(
+                        f"Player 2 ({player2_color.capitalize()}): Human or AI? (human/ai): ").strip().lower()
+                    if player2_type not in valid_player_types:
+                        print("Invalid player type! Please enter 'human' or 'ai'.")
+
+                #create players based on choices
+                if player1_type == "ai":
+                    self.players[1] = AIPlayer(1, color_choice)
+                else:
+                    self.players[1] = HumanPlayer(1, color_choice)
+
+                if player2_type == "ai":
+                    self.players[2] = AIPlayer(2, player2_color.lower())
+                else:
+                    self.players[2] = HumanPlayer(2, player2_color.lower())
+
                 return True
             else:
                 print("Color not recognized!")
@@ -232,20 +402,51 @@ class GameController:
             return False
 
     def play(self):
-        # Only start the game if ask_user() was successful
+        #only start the game if ask_user() was successful
         if self.game is None:
             print("Please start a valid game first.")
             return
 
         turn_count = 1
         print(str(self.game))
-        while turn_count < self.game.max_turns:
-            print(f"\n--- Turn {turn_count} ---")
-            move = self.player_interactor.interact(self.game.current_player)
-            if self.game.play_move(move):
 
+        game_over = False
+        #add a check for if both players are AI to add a delay
+        both_ai = all(isinstance(player, AIPlayer) for player in self.players.values())
+        if both_ai:
+            import time
+            delay = input("Both players are AI. Enter delay between moves in seconds (default 1): ")
+            try:
+                delay = float(delay) if delay.strip() else 1.0
+            except ValueError:
+                delay = 1.0
+
+        while not game_over and turn_count < self.game.max_turns:
+            print(f"\n--- Turn {turn_count} ---")
+
+            #get the current player
+            current_player = self.players[self.game.current_player]
+
+            #get the move from the player
+            move = current_player.get_move(self.game.board_status)
+
+            #make the move
+            result = self.game.play_move(move)
+
+            if result is None:  #game over (checkmate)
+                game_over = True
+            elif result:  #valid move
+                #notify both players of the move
+                for player in self.players.values():
+                    player.notify_move(move, self.game.board_status)
                 turn_count += 1
-        print("Game over after", self.game.max_turns, "turns")
+
+                #add delay if both players are AI
+                if both_ai and not game_over:
+                    time.sleep(delay)
+
+        if not game_over:
+            print("Game over after", self.game.max_turns, "turns")
 
 
 # Start game

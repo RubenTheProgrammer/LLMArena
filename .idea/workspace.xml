@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="added chess board visualization">
+    <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="Added stuff to do">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/cells.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/cells.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/chess.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/chess.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,13 +114,22 @@
       <option name="project" value="LOCAL" />
       <updated>1744366605794</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added stuff to do">
+      <option name="closed" value="true" />
+      <created>1744377249686</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744377249686</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixes and tweaks" />
     <MESSAGE value="fixed bugs" />
     <MESSAGE value="added chess board visualization" />
-    <option name="LAST_COMMIT_MESSAGE" value="added chess board visualization" />
+    <MESSAGE value="Added stuff to do" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added stuff to do" />
   </component>
 </project>

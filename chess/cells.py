@@ -7,7 +7,7 @@ class ChessCell:
         self.j = int(cell[1])
 
     def dist(self, other):
-        # Calculate the signed distance between cells
+        #calculate the signed distance between cells
         return self.i - other.i, self.j - other.j
 
     def __str__(self):
@@ -17,7 +17,7 @@ class ChessCell:
         finish_pos_i = self.i + distance_i
         finish_pos_j = self.j + distance_j
 
-        # Check if the new position is within the board
+        #check if the new position is within the board
         if (1 <= finish_pos_i <= 8) and (1 <= finish_pos_j <= 8):
             new_cell = ChessCell(f'{self.index_to_letter[finish_pos_i]}{finish_pos_j}')
             return new_cell
