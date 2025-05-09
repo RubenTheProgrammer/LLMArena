@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="Added stuff to do">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chess/cells.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/cells.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chess/chess.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/chess.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/pieces.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/pieces.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +122,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744377249686</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added stuff to do">
+      <option name="closed" value="true" />
+      <created>1746714124218</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1746714124218</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

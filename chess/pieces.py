@@ -27,29 +27,24 @@ class Pawn(Piece):
         super().__init__(color, "pawn", {"black": "♟", "white": "♙"})
         self.ever_moved = False
 
-
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
         distance_i, distance_j = end.dist(start)
         if self.color == "black":
-            distance_j *= -1
+            distance_j *= -1  #invert for black pawns moving down
         eating = kwargs.get("eating", False)
 
-        if not self.ever_moved:
-            if distance_i == 0 and 0 < distance_j <= 2:
-                return True
+        if eating:
+
+            return abs(distance_i) == 1 and distance_j == 1
+        else:
+
+            if distance_i == 0:
+                if not self.ever_moved:
+                    return 0 < distance_j <= 2
+                else:
+                    return distance_j == 1
             else:
                 return False
-        else:
-            if eating:
-                if abs(distance_i) == 1 and distance_j == 1:
-                    return True
-                else:
-                    return False
-            else:
-                if distance_i == 0 and distance_j == 1:
-                    return True
-                else:
-                    return False
 
     def moved(self, start: ChessCell, end: ChessCell, **kwargs):
         self.ever_moved = True
