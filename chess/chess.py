@@ -1,4 +1,6 @@
 from copy import deepcopy
+from ollama import chat
+import json
 
 from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from cells import ChessCell
@@ -350,20 +352,41 @@ class HumanPlayer(Player):
 
 
 class AIPlayer(Player):
-    #ai player
+
+    def __init__(self, player_number, color):
+        super().__init__(player_number, color)
+        self.prompt_format = "This is a chess game, you are the {color} player, the board status is \n{board_status}\n. Make your move. Respond using the json format."
+        self.response_schema = {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "description": "the current position of the piece to move (example: a2)",
+                    "type": "string",
+                },
+                "end": {
+                    "description": "the end position of the move (example: a4)",
+                    "type": "string",
+                }
+            },
+            "required": [
+                "start",
+                "end",
+            ]
+        }
+        self.model = "gemma3"
 
     def get_move(self, board_status):
         print(f"AI Player {self.player_number} ({self.color}) is thinking...")
 
-        #convert board_status to JSON format for the AI
-        board_json = {}
-        for pos, piece in board_status.items():
-            board_json[pos] = {
-                "type": piece.piece_type,
-                "color": piece.color
-            }
-
-        #here call ai to move
+        response = chat(
+            model=self.model,
+            messages=[{'role': 'user',
+                       'content': self.prompt_format.format(color=self.color, board_status=board_status)}],
+            format=self.response_schema,
+            stream=False,
+        )
+        content = json.loads(response.message.content)
+        return content["start"] + "-" + content["end"]
 
 
 

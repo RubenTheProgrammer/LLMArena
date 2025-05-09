@@ -15,6 +15,9 @@ class Piece(ABC):
     def __str__(self):
         return f"{self.color} {self.piece_type}"
 
+    def __repr__(self):
+        return str({"piece": self.piece_type, "color": self.color})
+
     def move(self, start: ChessCell, end: ChessCell, **kwargs) -> bool:
         raise NotImplementedError
 
