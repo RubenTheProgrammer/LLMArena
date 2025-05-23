@@ -3,9 +3,10 @@ from cells import ChessCell
 
 
 class Piece(ABC):
-    def __init__(self, color: str, piece_type: str, symbol: dict[str, str]):
+    def __init__(self, color: str, piece_type: str, symbol: dict[str, str], piece_initial: str):
         self.color = color
         self.piece_type = piece_type
+        self.piece_initial = piece_initial
         self._symbol = symbol
 
     @property
@@ -27,7 +28,7 @@ class Piece(ABC):
 
 class Pawn(Piece):
     def __init__(self, color):
-        super().__init__(color, "pawn", {"black": "♟", "white": "♙"})
+        super().__init__(color, "pawn", {"black": "♟", "white": "♙"}, "P")
         self.ever_moved = False
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
@@ -55,7 +56,7 @@ class Pawn(Piece):
 
 class Rook(Piece):
     def __init__(self, color):
-        super().__init__(color, "rook", {"black": "♜", "white": "♖"})
+        super().__init__(color, "rook", {"black": "♜", "white": "♖"}, "R")
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
         distance_i, distance_j = end.dist(start)
@@ -65,7 +66,7 @@ class Rook(Piece):
 
 class Knight(Piece):
     def __init__(self, color):
-        super().__init__(color, "knight", {"black": "♞", "white": "♘"})
+        super().__init__(color, "knight", {"black": "♞", "white": "♘"}, "N")
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
         distance_i, distance_j = end.dist(start)
@@ -76,7 +77,7 @@ class Knight(Piece):
 
 class Bishop(Piece):
     def __init__(self, color):
-        super().__init__(color, "bishop", {"black": "♝", "white": "♗"})
+        super().__init__(color, "bishop", {"black": "♝", "white": "♗"}, "B")
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
         distance_i, distance_j = end.dist(start)
@@ -86,7 +87,7 @@ class Bishop(Piece):
 
 class Queen(Piece):
     def __init__(self, color):
-        super().__init__(color, "queen", {"black": "♛", "white": "♕"})
+        super().__init__(color, "queen", {"black": "♛", "white": "♕"}, "Q")
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):
         distance_i, distance_j = end.dist(start)
@@ -96,7 +97,7 @@ class Queen(Piece):
 
 class King(Piece):
     def __init__(self, color):
-        super().__init__(color, "king", {"black": "♚", "white": "♔"})
+        super().__init__(color, "king", {"black": "♚", "white": "♔"}, "K")
         self.ever_moved = False
 
     def move(self, start: ChessCell, end: ChessCell, **kwargs):

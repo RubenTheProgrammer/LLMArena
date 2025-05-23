@@ -1,9 +1,8 @@
 from copy import deepcopy
-import json
 
-from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
+from Players import HumanPlayer, AIPlayer
 from cells import ChessCell
-from Players import Player, HumanPlayer, AIPlayer
+from pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 
 class ChessGame:
@@ -380,14 +379,17 @@ class GameController:
                         print("Invalid player type! Please enter 'human' or 'ai'.")
 
                 #create players based on choices
-                if player1_type == "ai":
-                    self.players[1] = AIPlayer(1, color_choice)
+                ai_player_types = {
+                    "ai": AIPlayer
+                }
+                if player1_type in ai_player_types:
+                    self.players[1] = ai_player_types[player1_type](1, color_choice)
                     self.players[1].game = self.game
                 else:
                     self.players[1] = HumanPlayer(1, color_choice)
 
-                if player2_type == "ai":
-                    self.players[2] = AIPlayer(2, player2_color.lower())
+                if player2_type in ai_player_types:
+                    self.players[2] = ai_player_types[player2_type](2, player2_color.lower())
                     self.players[2].game = self.game
                 else:
                     self.players[2] = HumanPlayer(2, player2_color.lower())
