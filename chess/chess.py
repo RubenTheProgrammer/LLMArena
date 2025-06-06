@@ -1,8 +1,10 @@
 from copy import deepcopy
 
-from Players import HumanPlayer, AIPlayer
+from Players import HumanPlayer, AIPlayer, MoveslogAiplayer
 from cells import ChessCell
 from pieces import Pawn, Rook, Knight, Bishop, Queen, King
+
+#TODO creare uno script che data una list di modelli (LLM) fa tutte le combinazioni di giocatori e crea un report (un file che salvo)
 
 
 class ChessGame:
@@ -17,6 +19,7 @@ class ChessGame:
         self.captured_pieces = {"white": [], "black": []}
         self.winner = None  #track the winner
         self.game_over = False  #track if game is over
+        self.gamelog = []
 
 
     def __str__(self) -> str:
@@ -58,6 +61,31 @@ class ChessGame:
             "g8": Knight("black"), "h8": Rook("black")
         }
         return pieces
+
+    def log_move(self, piece, end_cell):
+        if isinstance(piece, Pawn):
+            piece_initial = ""
+        else:
+            piece_initial = piece.piece_initial
+
+        self.gamelog.append(piece_initial + str(end_cell))
+
+    @property
+    def formatted_gamelog(self):
+        counter = 1
+        formatted_gamelog = []
+        for i in range(0, len(self.gamelog), 2):
+            whitemove = self.gamelog[i]
+            if i + 1 < len(self.gamelog):
+                blackmove = self.gamelog[i + 1]
+            else:
+                blackmove = ""
+            formatted_gamelog.append(f"{counter}. {whitemove} {blackmove}")
+            counter += 1
+
+        formatted_gamelog = "\n".join(formatted_gamelog)
+        return formatted_gamelog
+
 
     def play_move(self, move):
         # more robust move validation
@@ -136,6 +164,7 @@ class ChessGame:
 
         # Move was successful, update the board
         piece.moved(start_cell, end_cell)
+        self.log_move(piece, end_cell)
         print(f"Player {self.current_player} plays: {move}")
         print(str(self))
 
@@ -380,7 +409,7 @@ class GameController:
 
                 #create players based on choices
                 ai_player_types = {
-                    "ai": AIPlayer
+                    "ai": MoveslogAiplayer
                 }
                 if player1_type in ai_player_types:
                     self.players[1] = ai_player_types[player1_type](1, color_choice)
@@ -430,7 +459,10 @@ class GameController:
             current_player = self.players[self.game.current_player]
 
             # get the move from the player
-            move = current_player.get_move(self.game.board_status)
+            if isinstance(current_player, MoveslogAiplayer):
+                move = current_player.get_move(self.game.formatted_gamelog)
+            else:
+                move = current_player.get_move(self.game.board_status)
 
             # make the move
             result = self.game.play_move(move)
