@@ -40,9 +40,6 @@ class ChessGame:
             board_repr = f"{cur_row}\n" + board_repr
         return board_repr + f"  {bottom_row}"
 
-
-
-
     def initialize_pieces(self):
         #using the actual piece classes from pieces.py
         pieces = {
