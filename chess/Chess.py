@@ -6,7 +6,6 @@ from pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 #TODO creare uno script che data una list di modelli (LLM) fa tutte le combinazioni di giocatori e crea un report (un file che salvo)
 
-
 class ChessGame:
     def __init__(self, max_turns, player_color):
         self.max_turns = max_turns

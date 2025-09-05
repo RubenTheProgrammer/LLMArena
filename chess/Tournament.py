@@ -1,249 +1,228 @@
 import json
 import itertools
-from datetime import datetime
-from copy import deepcopy
 import time
 
+from Chess import ChessGame
 from Players import MoveslogAiplayer
-from chess import ChessGame
 
+from datetime import datetime
+from copy import deepcopy
+import random
 
-class LLMChessTournament:
-    def __init__(self, llm_models, max_turns=50, games_per_matchup=2):
+class LLMTournament:
+    def __init__(self, llm_models, max_turns=50, games_per_pair=2):
         self.llm_models = llm_models
         self.max_turns = max_turns
-        self.games_per_matchup = games_per_matchup
-        self.tournament_results = {
+        self.games_per_pair = games_per_pair
+        self.results = {
             "tournament_info": {
                 "models": llm_models,
                 "max_turns": max_turns,
-                "games_per_matchup": games_per_matchup,
+                "games_per_pair": games_per_pair,
                 "timestamp": datetime.now().isoformat()
             },
-            "matchups": [],
-            "model_stats": {},
-            "leaderboard": []
+            "games": [],
+            "statistics": {}
         }
-
-        for model in llm_models:
-            self.tournament_results["model_stats"][model] = {
-                "total_games": 0,
-                "wins": 0,
-                "losses": 0,
-                "draws": 0,
-                "win_rate": 0.0,
-                "avg_moves_per_game": 0.0,
-                "total_moves": 0,
-                "games_as_white": 0,
-                "games_as_black": 0,
-                "wins_as_white": 0,
-                "wins_as_black": 0
-            }
 
     def create_ai_player(self, model_name, player_number, color):
         player = MoveslogAiplayer(player_number, color)
         player.model = model_name
         return player
 
-    def play_game(self, model1, model2, model1_color):
-        model2_color = "black" if model1_color == "white" else "white"
+    def play_single_game(self, model1, model2, game_id):
+        colors = ["white", "black"]
+        random.shuffle(colors)
+        player1_color = colors[0]
+        player2_color = colors[1]
 
-        game = ChessGame(self.max_turns, model1_color)
+        game = ChessGame(self.max_turns, player1_color)
 
-        player1 = self.create_ai_player(model1, 1, model1_color)
-        player2 = self.create_ai_player(model2, 2, model2_color)
-
+        player1 = self.create_ai_player(model1, 1, player1_color)
+        player2 = self.create_ai_player(model2, 2, player2_color)
         player1.game = game
         player2.game = game
 
         players = {1: player1, 2: player2}
 
-        game_log = {
-            "model1": model1,
-            "model2": model2,
-            "model1_color": model1_color,
-            "model2_color": model2_color,
+        game_record = {
+            "game_id": game_id,
+            "player1": {"model": model1, "color": player1_color},
+            "player2": {"model": model2, "color": player2_color},
             "moves": [],
+            "errors": {"player1": 0, "player2": 0},
+            "skipped_turns": {"player1": 0, "player2": 0},
             "winner": None,
-            "winner_model": None,
-            "game_length": 0,
-            "result": "draw",
-            "final_position": None,
-            "captured_pieces": {"white": [], "black": []},
-            "errors": []
+            "game_status": "in_progress",
+            "final_board": None,
+            "game_log": [],
+            "turn_count": 0
         }
 
-        turn_count = 0
-        game_over = False
+        consecutive_errors = {1: 0, 2: 0}
 
-        while not game_over and turn_count < game.max_turns:
-            current_player = players[game.current_player]
-            current_model = model1 if current_player.player_number == 1 else model2
+        print(f"Starting game {game_id}: {model1} ({player1_color}) vs {model2} ({player2_color})")
+        print(str(game))
+
+        while not game.game_over and game.turn_count < self.max_turns:
+            current_player_num = game.current_player
+            current_player = players[current_player_num]
+
+            if consecutive_errors[current_player_num] >= 5:
+                print(f"Player {current_player_num} has made 5 consecutive errors. Skipping turn.")
+                game_record["skipped_turns"][f"player{current_player_num}"] += 1
+                consecutive_errors[current_player_num] = 0
+                game.current_player = 2 if current_player_num == 1 else 1
+                game.turn_count += 1
+                continue
 
             try:
-                if isinstance(current_player, MoveslogAiplayer):
-                    move = current_player.get_move(game.formatted_gamelog)
+                if len(game.gamelog) == 0:
+                    move = current_player.get_move("")
                 else:
-                    move = current_player.get_move(game.board_status)
-
-                game_log["moves"].append({
-                    "turn": turn_count + 1,
-                    "player": current_player.player_number,
-                    "model": current_model,
-                    "color": current_player.color,
-                    "move": move,
-                    "timestamp": datetime.now().isoformat()
-                })
+                    move = current_player.get_move(game.formatted_gamelog)
 
                 result = game.play_move(move)
 
+                move_record = {
+                    "player": current_player_num,
+                    "model": current_player.model,
+                    "move": move,
+                    "valid": False,
+                    "turn": game.turn_count,
+                    "result": None
+                }
+
                 if result == "win":
-                    game_over = True
-                    game_log["winner"] = game.winner
-                    game_log["winner_model"] = model1 if game.winner == 1 else model2
-                    game_log["result"] = "win"
+                    move_record["valid"] = True
+                    move_record["result"] = "win"
+                    game_record["winner"] = current_player_num
+                    game_record["game_status"] = "checkmate"
+                    consecutive_errors[current_player_num] = 0
                 elif result:
-                    for player in players.values():
-                        player.notify_move(move, game.board_status)
-                    turn_count += 1
+                    move_record["valid"] = True
+                    move_record["result"] = "continue"
+                    consecutive_errors[current_player_num] = 0
                 else:
-                    game_log["errors"].append({
-                        "turn": turn_count + 1,
-                        "player": current_player.player_number,
-                        "model": current_model,
-                        "invalid_move": move,
-                        "timestamp": datetime.now().isoformat()
-                    })
+                    move_record["valid"] = False
+                    move_record["result"] = "invalid_move"
+                    game_record["errors"][f"player{current_player_num}"] += 1
+                    consecutive_errors[current_player_num] += 1
+
+                game_record["moves"].append(move_record)
 
             except Exception as e:
-                game_log["errors"].append({
-                    "turn": turn_count + 1,
-                    "player": current_player.player_number,
-                    "model": current_model,
-                    "error": str(e),
-                    "timestamp": datetime.now().isoformat()
-                })
-                break
+                print(f"Error getting move from player {current_player_num}: {e}")
+                game_record["errors"][f"player{current_player_num}"] += 1
+                consecutive_errors[current_player_num] += 1
 
-        game_log["game_length"] = turn_count
-        game_log["final_position"] = {pos: f"{piece.color}_{piece.piece_type}"
+                error_record = {
+                    "player": current_player_num,
+                    "model": current_player.model,
+                    "move": "ERROR",
+                    "valid": False,
+                    "turn": game.turn_count,
+                    "result": "exception",
+                    "error": str(e)
+                }
+                game_record["moves"].append(error_record)
+
+        if not game.game_over and game.turn_count >= self.max_turns:
+            game_record["game_status"] = "max_turns_reached"
+
+        game_record["turn_count"] = game.turn_count
+        game_record["game_log"] = game.gamelog.copy()
+        game_record["final_board"] = {pos: {"piece": piece.piece_type, "color": piece.color}
                                       for pos, piece in game.board_status.items()}
-        game_log["captured_pieces"] = game.captured_pieces
 
-        return game_log
+        return game_record
 
     def run_tournament(self):
-        print(f"Starting LLM Chess Tournament with models: {self.llm_models}")
-        print(f"Games per matchup: {self.games_per_matchup}")
+        game_counter = 1
 
-        total_games = len(list(itertools.combinations(self.llm_models, 2))) * self.games_per_matchup * 2
-        current_game = 0
+        for model1, model2 in itertools.combinations_with_replacement(self.llm_models, 2):
+            games_to_play = self.games_per_pair if model1 != model2 else 1
 
-        for model1, model2 in itertools.combinations(self.llm_models, 2):
-            matchup_results = {
-                "model1": model1,
-                "model2": model2,
-                "games": [],
-                "summary": {
-                    f"{model1}_wins": 0,
-                    f"{model2}_wins": 0,
-                    "draws": 0,
-                    f"{model1}_wins_as_white": 0,
-                    f"{model1}_wins_as_black": 0,
-                    f"{model2}_wins_as_white": 0,
-                    f"{model2}_wins_as_black": 0
-                }
+            for game_num in range(games_to_play):
+                game_record = self.play_single_game(model1, model2, game_counter)
+                self.results["games"].append(game_record)
+                game_counter += 1
+
+                time.sleep(2)
+
+        self.calculate_statistics()
+
+    def calculate_statistics(self):
+        stats = {}
+
+        for model in self.llm_models:
+            stats[model] = {
+                "games_played": 0,
+                "wins": 0,
+                "losses": 0,
+                "draws": 0,
+                "total_moves": 0,
+                "valid_moves": 0,
+                "invalid_moves": 0,
+                "total_errors": 0,
+                "skipped_turns": 0,
+                "win_rate": 0,
+                "move_accuracy": 0,
+                "avg_moves_per_game": 0
             }
 
-            for game_num in range(self.games_per_matchup):
-                for color_setup in [("white", "black"), ("black", "white")]:
-                    current_game += 1
-                    model1_color, model2_color = color_setup
+        for game in self.results["games"]:
+            model1 = game["player1"]["model"]
+            model2 = game["player2"]["model"]
 
-                    print(f"Game {current_game}/{total_games}: {model1} ({model1_color}) vs {model2} ({model2_color})")
+            stats[model1]["games_played"] += 1
+            stats[model2]["games_played"] += 1
 
-                    game_result = self.play_game(model1, model2, model1_color)
-                    matchup_results["games"].append(game_result)
-
-                    self.update_model_stats(model1, model1_color, game_result)
-                    self.update_model_stats(model2, model2_color, game_result)
-
-                    if game_result["result"] == "win":
-                        winner_model = game_result["winner_model"]
-                        if winner_model == model1:
-                            matchup_results["summary"][f"{model1}_wins"] += 1
-                            if model1_color == "white":
-                                matchup_results["summary"][f"{model1}_wins_as_white"] += 1
-                            else:
-                                matchup_results["summary"][f"{model1}_wins_as_black"] += 1
-                        else:
-                            matchup_results["summary"][f"{model2}_wins"] += 1
-                            if model2_color == "white":
-                                matchup_results["summary"][f"{model2}_wins_as_white"] += 1
-                            else:
-                                matchup_results["summary"][f"{model2}_wins_as_black"] += 1
-                    else:
-                        matchup_results["summary"]["draws"] += 1
-
-                    time.sleep(1)
-
-            self.tournament_results["matchups"].append(matchup_results)
-
-        self.calculate_final_stats()
-        self.create_leaderboard()
-
-        return self.tournament_results
-
-    def update_model_stats(self, model, color, game_result):
-        stats = self.tournament_results["model_stats"][model]
-        stats["total_games"] += 1
-        stats["total_moves"] += game_result["game_length"]
-
-        if color == "white":
-            stats["games_as_white"] += 1
-        else:
-            stats["games_as_black"] += 1
-
-        if game_result["result"] == "win" and game_result["winner_model"] == model:
-            stats["wins"] += 1
-            if color == "white":
-                stats["wins_as_white"] += 1
+            if game["winner"] == 1:
+                stats[model1]["wins"] += 1
+                stats[model2]["losses"] += 1
+            elif game["winner"] == 2:
+                stats[model2]["wins"] += 1
+                stats[model1]["losses"] += 1
             else:
-                stats["wins_as_black"] += 1
-        elif game_result["result"] == "win":
-            stats["losses"] += 1
-        else:
-            stats["draws"] += 1
+                stats[model1]["draws"] += 1
+                stats[model2]["draws"] += 1
 
-    def calculate_final_stats(self):
-        for model, stats in self.tournament_results["model_stats"].items():
-            if stats["total_games"] > 0:
-                stats["win_rate"] = stats["wins"] / stats["total_games"]
-                stats["avg_moves_per_game"] = stats["total_moves"] / stats["total_games"]
+            stats[model1]["total_errors"] += game["errors"]["player1"]
+            stats[model2]["total_errors"] += game["errors"]["player2"]
 
-    def create_leaderboard(self):
-        leaderboard = []
-        for model, stats in self.tournament_results["model_stats"].items():
-            leaderboard.append({
-                "model": model,
-                "win_rate": stats["win_rate"],
-                "wins": stats["wins"],
-                "losses": stats["losses"],
-                "draws": stats["draws"],
-                "total_games": stats["total_games"],
-                "avg_moves_per_game": stats["avg_moves_per_game"]
-            })
+            stats[model1]["skipped_turns"] += game["skipped_turns"]["player1"]
+            stats[model2]["skipped_turns"] += game["skipped_turns"]["player2"]
 
-        leaderboard.sort(key=lambda x: x["win_rate"], reverse=True)
-        self.tournament_results["leaderboard"] = leaderboard
+            for move in game["moves"]:
+                player_num = move["player"]
+                model = move["model"]
+
+                stats[model]["total_moves"] += 1
+
+                if move["valid"]:
+                    stats[model]["valid_moves"] += 1
+                else:
+                    stats[model]["invalid_moves"] += 1
+
+        for model in self.llm_models:
+            model_stats = stats[model]
+            if model_stats["games_played"] > 0:
+                model_stats["win_rate"] = model_stats["wins"] / model_stats["games_played"]
+                model_stats["avg_moves_per_game"] = model_stats["total_moves"] / model_stats["games_played"]
+
+            if model_stats["total_moves"] > 0:
+                model_stats["move_accuracy"] = model_stats["valid_moves"] / model_stats["total_moves"]
+
+        self.results["statistics"] = stats
 
     def save_results(self, filename=None):
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"llm_chess_tournament_{timestamp}.json"
 
-        with open(filename, 'w') as f:
-            json.dump(self.tournament_results, f, indent=2)
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(self.results, f, indent=2, ensure_ascii=False)
 
         print(f"Tournament results saved to {filename}")
         return filename
@@ -253,36 +232,33 @@ class LLMChessTournament:
         print("TOURNAMENT SUMMARY")
         print("=" * 60)
 
-        print(f"\nModels: {', '.join(self.llm_models)}")
-        print(
-            f"Total Games: {sum(stats['total_games'] for stats in self.tournament_results['model_stats'].values()) // 2}")
-
-        print("\nLEADERBOARD:")
-        print("-" * 80)
-        print(f"{'Rank':<5} {'Model':<20} {'Win Rate':<10} {'W':<4} {'L':<4} {'D':<4} {'Avg Moves':<10}")
-        print("-" * 80)
-
-        for i, entry in enumerate(self.tournament_results["leaderboard"], 1):
-            print(
-                f"{i:<5} {entry['model']:<20} {entry['win_rate']:.3f}     {entry['wins']:<4} {entry['losses']:<4} {entry['draws']:<4} {entry['avg_moves_per_game']:.1f}")
+        for model, stats in self.results["statistics"].items():
+            print(f"\n{model.upper()}:")
+            print(f"  Games: {stats['games_played']}")
+            print(f"  W/L/D: {stats['wins']}/{stats['losses']}/{stats['draws']}")
+            print(f"  Win Rate: {stats['win_rate']:.2%}")
+            print(f"  Move Accuracy: {stats['move_accuracy']:.2%}")
+            print(f"  Total Errors: {stats['total_errors']}")
+            print(f"  Skipped Turns: {stats['skipped_turns']}")
+            print(f"  Avg Moves/Game: {stats['avg_moves_per_game']:.1f}")
 
 
 if __name__ == "__main__":
     llm_models = [
         "llama3.2",
         "deepseek-r1:7b",
-        "qwen2.5",
+        "qwen3:8b",
         "mistral"
     ]
 
-    tournament = LLMChessTournament(
+    tournament = LLMTournament(
         llm_models=llm_models,
-        max_turns=50,
-        games_per_matchup=1
+        max_turns=5,
+        games_per_pair=2
     )
 
-    results = tournament.run_tournament()
-    filename = tournament.save_results()
+    tournament.run_tournament()
     tournament.print_summary()
+    filename = tournament.save_results()
 
     print(f"\nDetailed results saved to: {filename}")
