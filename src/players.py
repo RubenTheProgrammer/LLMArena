@@ -60,7 +60,7 @@ class AIPlayer(Player):
                 "end",
             ]
         }
-        self.model = "deepseek-r1:7b"
+        self.model = "mistral"
         self.game = None  # Will be set by GameController
 
     def get_move(self, board_status):
@@ -112,7 +112,7 @@ class MoveslogAiplayer(Player):
                 "move",
             ]
         }
-        self.model = "llama3.2"
+        self.model = "mistral"
         self.game = None  # Will be set by GameController
 
     def get_move(self, board_status):

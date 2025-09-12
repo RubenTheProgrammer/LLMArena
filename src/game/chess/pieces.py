@@ -1,5 +1,5 @@
 from abc import ABC
-from cells import ChessCell
+from .cells import ChessCell
 
 
 class Piece(ABC):

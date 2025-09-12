@@ -5,9 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="Added stuff to do">
+      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/game/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/game/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/game/chess/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gamecontroller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Players.py" beforeDir="false" afterPath="$PROJECT_DIR$/Players.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chess/Tournament.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/Tournament.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Players.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/players.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/Chess.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/chess/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/Tournament.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tournament.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/cells.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/chess/cells.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess/pieces.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/chess/pieces.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,23 +57,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.Chess.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Players.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Tournament.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cells.executor&quot;: &quot;Run&quot;,
-    &quot;Python.chess.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pieces.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.Chess.executor": "Run",
+    "Python.Main.executor": "Run",
+    "Python.Players.executor": "Run",
+    "Python.Tournament.executor": "Run",
+    "Python.cells.executor": "Run",
+    "Python.chess.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.pieces.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/game/chess" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/game" />
       <recent name="$PROJECT_DIR$/chess" />
     </key>
   </component>
@@ -196,7 +210,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757075195490</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Added stuff to do">
+      <option name="closed" value="true" />
+      <created>1757662227693</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1757662227693</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
