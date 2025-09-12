@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="Added stuff to do">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Players.py" beforeDir="false" afterPath="$PROJECT_DIR$/Players.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chess/Tournament.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/Tournament.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chess/chess.py" beforeDir="false" afterPath="$PROJECT_DIR$/chess/chess.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,8 +188,27 @@
       <option name="project" value="LOCAL" />
       <updated>1757025135900</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Added stuff to do">
+      <option name="closed" value="true" />
+      <created>1757075195490</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1757075195490</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixes and tweaks" />

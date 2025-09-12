@@ -136,4 +136,3 @@ class MoveslogAiplayer(Player):
         if "x" in move or "-" in move:
             del move[-3]
         return move[-4:-2] + "-" + move[-2:]
-
