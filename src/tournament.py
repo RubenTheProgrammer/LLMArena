@@ -2,8 +2,8 @@ import json
 import itertools
 import time
 
-from Chess import ChessGame
-from Players import MoveslogAiplayer
+from game.chess.game import ChessGame
+from .players import MoveslogAiplayer
 
 from datetime import datetime
 from copy import deepcopy
