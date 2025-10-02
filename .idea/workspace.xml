@@ -52,8 +52,10 @@
     "Python.Tournament.executor": "Run",
     "Python.cells.executor": "Run",
     "Python.chess.executor": "Run",
+    "Python.gamecontroller.executor": "Run",
     "Python.main.executor": "Run",
     "Python.pieces.executor": "Run",
+    "Python.tournament.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
@@ -213,7 +215,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757681775282</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="modular changes">
+      <option name="closed" value="true" />
+      <created>1758888344377</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1758888344377</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

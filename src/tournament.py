@@ -2,20 +2,27 @@ import json
 import itertools
 import time
 
-from game.chess.game import ChessGame
-from .players import MoveslogAiplayer
+from .gameregistry import GameRegistry
+from .players import PLAYER_REGISTRY
 
 from datetime import datetime
 from copy import deepcopy
 import random
 
+
 class LLMTournament:
-    def __init__(self, llm_models, max_turns=50, games_per_pair=2):
+    def __init__(self, game_name, llm_models, max_turns=50, games_per_pair=2):
+        if not GameRegistry.is_valid_game(game_name):
+            raise ValueError(f"Game '{game_name}' not found in registry")
+
+        self.game_name = game_name
+        self.game_class = GameRegistry.get_game(game_name)
         self.llm_models = llm_models
         self.max_turns = max_turns
         self.games_per_pair = games_per_pair
         self.results = {
             "tournament_info": {
+                "game": game_name,
                 "models": llm_models,
                 "max_turns": max_turns,
                 "games_per_pair": games_per_pair,
@@ -26,17 +33,25 @@ class LLMTournament:
         }
 
     def create_ai_player(self, model_name, player_number, color):
-        player = MoveslogAiplayer(player_number, color)
+        player_types = self.game_class.get_player_types()
+
+        if "ai" not in player_types:
+            raise ValueError(f"Game '{self.game_name}' does not support AI players")
+
+        player_class_name = player_types["ai"]
+        player_class = PLAYER_REGISTRY[player_class_name]
+
+        player = player_class(player_number, color)
         player.model = model_name
         return player
 
     def play_single_game(self, model1, model2, game_id):
-        colors = ["white", "black"]
+        colors = self.game_class.get_default_colors()
         random.shuffle(colors)
         player1_color = colors[0]
         player2_color = colors[1]
 
-        game = ChessGame(self.max_turns, player1_color)
+        game = self.game_class(self.max_turns, player1_color)
 
         player1 = self.create_ai_player(model1, 1, player1_color)
         player2 = self.create_ai_player(model2, 2, player2_color)
@@ -132,8 +147,12 @@ class LLMTournament:
 
         game_record["turn_count"] = game.turn_count
         game_record["game_log"] = game.gamelog.copy()
-        game_record["final_board"] = {pos: {"piece": piece.piece_type, "color": piece.color}
-                                      for pos, piece in game.board_status.items()}
+
+        try:
+            game_record["final_board"] = {pos: {"piece": piece.piece_type, "color": piece.color}
+                                          for pos, piece in game.board_status.items()}
+        except AttributeError:
+            game_record["final_board"] = game.board_status.copy()
 
         return game_record
 
@@ -219,7 +238,7 @@ class LLMTournament:
     def save_results(self, filename=None):
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"llm_chess_tournament_{timestamp}.json"
+            filename = f"llm_{self.game_name}_tournament_{timestamp}.json"
 
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(self.results, f, indent=2, ensure_ascii=False)
@@ -229,7 +248,7 @@ class LLMTournament:
 
     def print_summary(self):
         print("\n" + "=" * 60)
-        print("TOURNAMENT SUMMARY")
+        print(f"TOURNAMENT SUMMARY - {self.game_name.upper()}")
         print("=" * 60)
 
         for model, stats in self.results["statistics"].items():
@@ -245,13 +264,12 @@ class LLMTournament:
 
 if __name__ == "__main__":
     llm_models = [
-        #"llama3.2",
-        #"deepseek-r1:7b",
         "qwen3:8b",
         "mistral"
     ]
 
     tournament = LLMTournament(
+        game_name="chess",
         llm_models=llm_models,
         max_turns=5,
         games_per_pair=2

@@ -1,12 +1,8 @@
-from symtable import Class
-
 from ollama import chat
 import json
 
 
 class Player:
-    # Base class for all players
-
     def __init__(self, player_number, color):
         self.player_number = player_number
         self.color = color
@@ -19,16 +15,12 @@ class Player:
 
 
 class HumanPlayer(Player):
-    # human player input is from console
-
     def get_move(self, board_status):
         move = input(f"Player {self.player_number} ({self.color}), enter your move (e.g., 'e2-e4'): ")
         return move
 
 
 class AIPlayer(Player):
-    # AI player uses ollama for moves
-
     def __init__(self, player_number, color):
         super().__init__(player_number, color)
         self.prompt_format = """
@@ -61,12 +53,11 @@ class AIPlayer(Player):
             ]
         }
         self.model = "mistral"
-        self.game = None  # Will be set by GameController
+        self.game = None
 
     def get_move(self, board_status):
         print(f"AI Player {self.player_number} ({self.color}) is thinking...")
 
-        # Get the visual board representation
         board_visual = {"white": [], "black": []}
 
         for position, piece in board_status.items():
@@ -88,7 +79,6 @@ class AIPlayer(Player):
         return content["start"] + "-" + content["end"]
 
 class MoveslogAiplayer(Player):
-
     def __init__(self, player_number, color):
         super().__init__(player_number, color)
         self.prompt_format = """
@@ -113,7 +103,7 @@ class MoveslogAiplayer(Player):
             ]
         }
         self.model = "mistral"
-        self.game = None  # Will be set by GameController
+        self.game = None
 
     def get_move(self, board_status):
         print(f"AI Player {self.player_number} ({self.color}) is thinking...")
@@ -136,3 +126,10 @@ class MoveslogAiplayer(Player):
         if "x" in move or "-" in move:
             del move[-3]
         return move[-4:-2] + "-" + move[-2:]
+
+
+PLAYER_REGISTRY = {
+    "HumanPlayer": HumanPlayer,
+    "AIPlayer": AIPlayer,
+    "MoveslogAiplayer": MoveslogAiplayer
+}
