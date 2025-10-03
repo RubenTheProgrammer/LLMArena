@@ -3,10 +3,8 @@ import itertools
 import time
 
 from .gameregistry import GameRegistry
-from .players import PLAYER_REGISTRY
 
 from datetime import datetime
-from copy import deepcopy
 import random
 
 
@@ -34,15 +32,9 @@ class LLMTournament:
 
     def create_ai_player(self, model_name, player_number, color):
         player_types = self.game_class.get_player_types()
-
         if "ai" not in player_types:
             raise ValueError(f"Game '{self.game_name}' does not support AI players")
-
-        player_class_name = player_types["ai"]
-        player_class = PLAYER_REGISTRY[player_class_name]
-
-        player = player_class(player_number, color)
-        player.model = model_name
+        player = player_types["ai"](player_number, color, model_name)
         return player
 
     def play_single_game(self, model1, model2, game_id):
@@ -55,8 +47,6 @@ class LLMTournament:
 
         player1 = self.create_ai_player(model1, 1, player1_color)
         player2 = self.create_ai_player(model2, 2, player2_color)
-        player1.game = game
-        player2.game = game
 
         players = {1: player1, 2: player2}
 

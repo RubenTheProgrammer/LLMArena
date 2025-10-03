@@ -1,4 +1,3 @@
-from .players import HumanPlayer, PLAYER_REGISTRY
 from .gameregistry import GameRegistry
 
 
@@ -39,7 +38,7 @@ class GameController:
 
         player2_color = valid_colors[1] if color_choice == valid_colors[0] else valid_colors[0]
 
-        valid_player_types = list(game_class.get_player_types().keys()) + ["human"]
+        valid_player_types = list(game_class.get_player_types().keys())
 
         player1_type = ""
         while player1_type not in valid_player_types:
@@ -55,21 +54,13 @@ class GameController:
             if player2_type not in valid_player_types:
                 print(f"Invalid player type! Please enter one of: {', '.join(valid_player_types)}.")
 
-        ai_player_types = game_class.get_player_types()
+        player_types = game_class.get_player_types()
 
-        if player1_type in ai_player_types:
-            player_class_name = ai_player_types[player1_type]
-            self.players[1] = PLAYER_REGISTRY[player_class_name](1, color_choice)
-            self.players[1].game = self.game
-        else:
-            self.players[1] = HumanPlayer(1, color_choice)
+        if player1_type in player_types:
+            self.players[1] = player_types[player1_type](1, color_choice)
 
-        if player2_type in ai_player_types:
-            player_class_name = ai_player_types[player2_type]
-            self.players[2] = PLAYER_REGISTRY[player_class_name](2, player2_color.lower())
-            self.players[2].game = self.game
-        else:
-            self.players[2] = HumanPlayer(2, player2_color.lower())
+        if player2_type in player_types:
+            self.players[2] = player_types[player2_type](2, player2_color.lower())
 
         return True
 
@@ -83,8 +74,8 @@ class GameController:
 
         game_over = False
 
-        from .players import MoveslogAiplayer, AIPlayer
-        both_ai = all(isinstance(player, (AIPlayer, MoveslogAiplayer)) for player in self.players.values())
+        from .players import AIPlayer
+        both_ai = all(isinstance(player, AIPlayer) for player in self.players.values())
 
         if both_ai:
             import time
@@ -99,10 +90,7 @@ class GameController:
 
             current_player = self.players[self.game.current_player]
 
-            if isinstance(current_player, MoveslogAiplayer):
-                move = current_player.get_move(self.game.formatted_gamelog)
-            else:
-                move = current_player.get_move(self.game.board_status)
+            move = current_player.get_move(self.game)
 
             result = self.game.play_move(move)
 
@@ -110,8 +98,6 @@ class GameController:
                 game_over = True
                 print(f"Game over! Player {self.game.winner} wins!")
             elif result:
-                for player in self.players.values():
-                    player.notify_move(move, self.game.board_status)
                 turn_count += 1
 
                 if both_ai and not game_over:

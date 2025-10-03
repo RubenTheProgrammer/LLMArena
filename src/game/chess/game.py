@@ -16,8 +16,11 @@ class ChessGame(Game):
 
     @classmethod
     def get_player_types(cls):
+        from . import ChessAIPlayer, ChessHumanPlayer
+
         return {
-            "ai": "MoveslogAiplayer"
+            "ai": ChessAIPlayer,
+            "human": ChessHumanPlayer,
         }
 
     @classmethod
@@ -78,6 +81,7 @@ class ChessGame(Game):
         end_cell = ChessCell(end_cell_str)
 
         if start_cell_str not in self.board_status:
+            print(f"Move '{move}' is not valid!")
             print(f"No piece at {start_cell_str}!")
             return False
 
@@ -89,12 +93,14 @@ class ChessGame(Game):
             current_player_color = "black" if self.current_player == 1 else "white"
 
         if piece.color.lower() != current_player_color:
+            print(f"Move '{move}' is not valid!")
             print(f"Player {self.current_player} can only move {current_player_color} pieces!")
             return False
 
         if end_cell_str in self.board_status:
             target_piece = self.board_status[end_cell_str]
             if target_piece.color == piece.color:
+                print(f"Move '{move}' is not valid!")
                 print(f"Cannot capture your own {target_piece}!")
                 return False
             self.captured_pieces[target_piece.color].append(target_piece)
@@ -105,10 +111,12 @@ class ChessGame(Game):
         if piece.piece_type != "knight":
             path = self._get_path(start_cell, end_cell)
             if path and not self._is_path_clear(path):
+                print(f"Move '{move}' is not valid!")
                 print(f"Path is blocked for {piece}!")
                 return False
 
         if not piece.move(start_cell, end_cell, eating=eating):
+            print(f"Move '{move}' is not valid!")
             print(f"Invalid move for {piece}!")
             return False
 
