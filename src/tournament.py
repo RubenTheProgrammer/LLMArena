@@ -257,7 +257,9 @@ if __name__ == "__main__":
         "qwen3:8b",
         "mistral",
         "llama3.2",
-        "deepseek-r1:7b"
+        "deepseek-r1:7b",
+        "gpt-oss:120b-cloud",
+        "deepseek-v3.1:671b-cloud"
     ]
 
     tournament = LLMTournament(

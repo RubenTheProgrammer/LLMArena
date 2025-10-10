@@ -6,7 +6,7 @@ class ChessHumanPlayer(HumanPlayer):
         super().__init__(player_number, color, player_prompt)
 
 class ChessAIPlayer(AIPlayer):
-    def __init__(self, player_number, color, model="mistral"):
+    def __init__(self, player_number, color, model="gpt-oss:120b-cloud"):
         prompt_format = """
         Here is the game log of a chess game in algebraic notation:
         {formatted_gamelog}
@@ -41,5 +41,5 @@ class ChessAIPlayer(AIPlayer):
         move = self._prompt_model(message=message)
 
         if "x" in move or "-" in move:
-            del move[-3]
+            move = move[:-3]+move[-2:]
         return move[-4:-2] + "-" + move[-2:]

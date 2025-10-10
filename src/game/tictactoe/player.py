@@ -12,7 +12,7 @@ class TicTacToeHumanPlayer(HumanPlayer):
 
 
 class TicTacToeAIPlayer(AIPlayer):
-    def __init__(self, player_number, color, model="mistral"):
+    def __init__(self, player_number, color, model="gpt-oss:120b-cloud"):
         prompt_format = """
         You are playing Tic Tac Toe as {symbol}.
 
