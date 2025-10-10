@@ -1,12 +1,23 @@
 from .gameregistry import GameRegistry
+from .tournament import LLMTournament
 
 
 class GameController:
     def __init__(self):
         self.game = None
         self.players = {}
+        self.mode = None
+        self.game_name = None
 
     def ask_user(self):
+        mode_input = input("Mode? (single/tournament): ").strip().lower()
+
+        if mode_input not in ["single", "tournament"]:
+            print("Mode not recognized!")
+            return False
+
+        self.mode = mode_input
+
         available_games = GameRegistry.get_all_games()
         game_input = input(f"Which game? ({', '.join(available_games)}): ").strip().lower()
 
@@ -14,6 +25,39 @@ class GameController:
             print("Game not recognized!")
             return False
 
+        self.game_name = game_input
+
+        if self.mode == "tournament":
+            return self._setup_tournament()
+        else:
+            return self._setup_single_game()
+
+    def _setup_tournament(self):
+        models_input = input("Enter AI models separated by comma (e.g., mistral,qwen3:8b): ").strip()
+        models = [m.strip() for m in models_input.split(",")]
+
+        if len(models) < 2:
+            print("Need at least 2 models for tournament!")
+            return False
+
+        turns_input = input("Maximum turns per game? ")
+        if not turns_input.isnumeric():
+            print("Not a valid amount of turns!")
+            return False
+        turns = int(turns_input)
+
+        games_input = input("Games per pair? (default 2): ").strip()
+        games_per_pair = int(games_input) if games_input.isnumeric() else 2
+
+        self.tournament = LLMTournament(
+            game_name=self.game_name,
+            llm_models=models,
+            max_turns=turns,
+            games_per_pair=games_per_pair
+        )
+        return True
+
+    def _setup_single_game(self):
         turns_input = input("How many turns? ")
 
         if not turns_input.isnumeric():
@@ -26,7 +70,7 @@ class GameController:
             print("Not a valid amount of turns!")
             return False
 
-        game_class = GameRegistry.get_game(game_input)
+        game_class = GameRegistry.get_game(self.game_name)
         valid_colors = game_class.get_default_colors()
 
         color_choice = input(f"What color should Player 1 be? ({'/'.join(valid_colors)}): ").strip().lower()
@@ -65,6 +109,18 @@ class GameController:
         return True
 
     def play(self):
+        if self.mode == "tournament":
+            self._play_tournament()
+        else:
+            self._play_single_game()
+
+    def _play_tournament(self):
+        self.tournament.run_tournament()
+        self.tournament.print_summary()
+        filename = self.tournament.save_results()
+        print(f"\nDetailed results saved to: {filename}")
+
+    def _play_single_game(self):
         if self.game is None:
             print("Please start a valid game first.")
             return
