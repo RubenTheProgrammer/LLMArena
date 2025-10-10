@@ -7,6 +7,11 @@ from .gameregistry import GameRegistry
 from datetime import datetime
 import random
 
+#TODO redo this code to make it so it doesn't use the cartesian product anymore, optimize it to make it so
+# it uses combinations (i.e. a model plays once against each model, deepseek vs llama, deepseek vs mistral, but not
+# llama vs deepseek, mistral vs deepseek, basically make them play ONCE vs each model)
+# (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)
+
 
 class LLMTournament:
     def __init__(self, game_name, llm_models, max_turns=50, games_per_pair=2):
