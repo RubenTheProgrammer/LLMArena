@@ -10,9 +10,9 @@ class GameController:
         self.game_name = None
 
     def ask_user(self):
-        mode_input = input("Mode? (single/tournament): ").strip().lower()
+        mode_input = input("Mode? (normal/tournament): ").strip().lower()
 
-        if mode_input not in ["single", "tournament"]:
+        if mode_input not in ["normal", "tournament"]:
             print("Mode not recognized!")
             return False
 
@@ -73,7 +73,7 @@ class GameController:
         game_class = GameRegistry.get_game(self.game_name)
         valid_colors = game_class.get_default_colors()
 
-        color_choice = input(f"What color should Player 1 be? ({'/'.join(valid_colors)}): ").strip().lower()
+        color_choice = input(f"What should Player 1 be? ({'/'.join(valid_colors)}): ").strip().lower()
         if color_choice not in valid_colors:
             print("Color not recognized!")
             return False
@@ -135,11 +135,7 @@ class GameController:
 
         if both_ai:
             import time
-            delay = input("Both players are AI. Enter delay between moves in seconds (default 1): ")
-            try:
-                delay = float(delay) if delay.strip() else 1.0
-            except ValueError:
-                delay = 1.0
+            delay = 1.0
 
         while not game_over and turn_count < self.game.max_turns:
             print(f"\n--- Turn {turn_count} ---")

@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="modular changes">
-      <change afterPath="$PROJECT_DIR$/src/game/tictactoe/game.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/game/tictactoe/player.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/game/tictactoe/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/game/tictactoe/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gamecontroller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gamecontroller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -246,7 +242,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759495419584</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="modular changes">
+      <option name="closed" value="true" />
+      <created>1760090285899</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760090285899</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
