@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="modular changes">
-      <change beforePath="$PROJECT_DIR$/src/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gamecontroller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gamecontroller.py" afterDir="false" />
-    </list>
+    <list default="true" id="0e74aef0-86c9-4a62-9715-7fdd1ce8c67a" name="Changes" comment="tic tac toe + more modular changes" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -250,7 +247,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760090285899</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="tic tac toe + more modular changes">
+      <option name="closed" value="true" />
+      <created>1760090651861</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1760090651861</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -270,6 +275,7 @@
     <MESSAGE value="added chess board visualization" />
     <MESSAGE value="Added stuff to do" />
     <MESSAGE value="modular changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="modular changes" />
+    <MESSAGE value="tic tac toe + more modular changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="tic tac toe + more modular changes" />
   </component>
 </project>

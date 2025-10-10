@@ -255,7 +255,9 @@ class LLMTournament:
 if __name__ == "__main__":
     llm_models = [
         "qwen3:8b",
-        "mistral"
+        "mistral",
+        "llama3.2",
+        "deepseek-r1:7b"
     ]
 
     tournament = LLMTournament(
