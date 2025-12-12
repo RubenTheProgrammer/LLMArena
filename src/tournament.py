@@ -8,7 +8,7 @@ from .gameregistry import GameRegistry
 from datetime import datetime
 import random
 
-#TODO salvare una chiave avversaria
+#TODO salvare la chiave avversaria anche in ogni partita
 
 
 class LLMTournament:
