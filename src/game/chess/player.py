@@ -33,10 +33,15 @@ class ChessAIPlayer(AIPlayer):
     def get_move(self, game):
         print(f"AI Player {self.player_number} ({self.color}) is thinking...")
 
-        if len(game.formatted_gamelog) == 0:
+        if isinstance(game, str):
+            formatted_gamelog = game
+        else:
+            formatted_gamelog = game.formatted_gamelog
+
+        if len(formatted_gamelog) == 0:
             message = f"You are playing the {self.color} pieces in a chess game. Decide the first move using long algebraic notation. Respond ONLY with the move in JSON format."
         else:
-            message = self.prompt_format.format(color=self.color, formatted_gamelog=game.formatted_gamelog)
+            message = self.prompt_format.format(color=self.color, formatted_gamelog=formatted_gamelog)
 
         move = self._prompt_model(message=message)
 

@@ -8,8 +8,6 @@ from .gameregistry import GameRegistry
 from datetime import datetime
 import random
 
-#TODO salvare la chiave avversaria anche in ogni partita
-
 
 class LLMTournament:
     def __init__(self, game_name, llm_models, max_turns=50, games_per_pair=2, results_file="tournament_results.json"):
@@ -45,7 +43,8 @@ class LLMTournament:
                 "losses": 0,
                 "draws": 0,
                 "valid_moves": 0,
-                "errors": 0
+                "errors": 0,
+                "matches": []
             }
 
     def create_ai_player(self, model_name, player_number, color):
@@ -147,17 +146,37 @@ class LLMTournament:
         if winner is None:
             self.results["models"][model1]["draws"] += 1
             self.results["models"][model2]["draws"] += 1
+            result1 = "draw"
+            result2 = "draw"
         elif winner == model1:
             self.results["models"][model1]["wins"] += 1
             self.results["models"][model2]["losses"] += 1
+            result1 = "win"
+            result2 = "loss"
         else:
             self.results["models"][model2]["wins"] += 1
             self.results["models"][model1]["losses"] += 1
+            result1 = "loss"
+            result2 = "win"
 
         self.results["models"][model1]["valid_moves"] += stats[model1]["valid"]
         self.results["models"][model1]["errors"] += stats[model1]["errors"]
         self.results["models"][model2]["valid_moves"] += stats[model2]["valid"]
         self.results["models"][model2]["errors"] += stats[model2]["errors"]
+
+        self.results["models"][model1]["matches"].append({
+            "opponent": model2,
+            "result": result1,
+            "valid_moves": stats[model1]["valid"],
+            "errors": stats[model1]["errors"]
+        })
+
+        self.results["models"][model2]["matches"].append({
+            "opponent": model1,
+            "result": result2,
+            "valid_moves": stats[model2]["valid"],
+            "errors": stats[model2]["errors"]
+        })
 
     def save_results(self, filename=None):
         # Save results to file
@@ -169,11 +188,10 @@ class LLMTournament:
         with open(self.results_file, 'w', encoding='utf-8') as f:
             json.dump(self.results, f, indent=2, ensure_ascii=False)
 
-        print(f"\nResults saved to {self.results_file}")
+        print("\n")
         return self.results_file
 
     def print_summary(self):
-        print("\n" + "=" * 80)
         print(
             f"{'MODEL':<25} {'GAMES':>6} {'WINS':>6} {'LOSSES':>6} {'DRAWS':>6} {'VALID':>8} {'ERRORS':>8} {'WIN%':>8}")
         print("=" * 80)
@@ -183,8 +201,7 @@ class LLMTournament:
             print(f"{model:<25} {stats['games']:>6} {stats['wins']:>6} {stats['losses']:>6} "
                   f"{stats['draws']:>6} {stats['valid_moves']:>8} {stats['errors']:>8} {win_rate:>7.1f}%")
 
-        print("=" * 80)
-        print(f"Total games played: {self.results['games_played']}")
+        print(f"\nTotal games played: {self.results['games_played']}")
         print(f"Last updated: {self.results['last_updated']}")
 
 

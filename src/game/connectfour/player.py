@@ -11,6 +11,19 @@ class ConnectFourHumanPlayer(HumanPlayer):
         return move
 
 
+from src.players import HumanPlayer, AIPlayer
+
+
+class ConnectFourHumanPlayer(HumanPlayer):
+    def __init__(self, player_number, color):
+        player_prompt = "Player {player_number} ({color}), enter your column (1-7): "
+        super().__init__(player_number, color.capitalize(), player_prompt)
+
+    def get_move(self, game):
+        move = input(self.player_prompt.format(player_number=self.player_number, color=self.color))
+        return move
+
+
 class ConnectFourAIPlayer(AIPlayer):
     def __init__(self, player_number, color, model="gpt-oss:120b-cloud"):
         prompt_format = """
@@ -64,13 +77,35 @@ class ConnectFourAIPlayer(AIPlayer):
     def get_move(self, game):
         print(f"AI Player {self.player_number} ({self.color}) is thinking...")
 
-        symbol = "R" if self.color == "RED" else "Y"
+        symbol = "R" if self.color.upper() == "RED" else "Y"
+        rows = 6
+        columns = 7
+
+        if isinstance(game, str):
+            board = [[None for _ in range(columns)] for _ in range(rows)]
+
+            if game:
+                moves = game.strip().split("\n") if "\n" in game else game.strip().split()
+                for move_entry in moves:
+                    move_entry = move_entry.strip()
+                    if len(move_entry) >= 2 and move_entry[0] in "RY" and move_entry[1:].isdigit():
+                        piece = move_entry[0]
+                        col = int(move_entry[1:]) - 1
+                        if 0 <= col < columns:
+                            for row in range(rows - 1, -1, -1):
+                                if board[row][col] is None:
+                                    board[row][col] = piece
+                                    break
+        else:
+            board = game.board
+            rows = game.rows
+            columns = game.columns
 
         board_lines = []
-        for row in range(game.rows):
+        for row in range(rows):
             line = ""
-            for col in range(game.columns):
-                piece = game.board[row][col]
+            for col in range(columns):
+                piece = board[row][col]
                 if piece is None:
                     line += " ·"
                 else:
@@ -81,14 +116,11 @@ class ConnectFourAIPlayer(AIPlayer):
 
         column_status = []
         available_columns = []
-        for col in range(1, 8):
-            if game.board[0][col - 1] is None:
+        for col in range(1, columns + 1):
+            if board[0][col - 1] is None:
                 available_columns.append(str(col))
-                pieces_in_col = 0
-                for row in range(game.rows):
-                    if game.board[row][col - 1] is not None:
-                        pieces_in_col += 1
-                column_status.append(f"Column {col}: {6 - pieces_in_col} spaces left")
+                pieces_in_col = sum(1 for row in range(rows) if board[row][col - 1] is not None)
+                column_status.append(f"Column {col}: {rows - pieces_in_col} spaces left")
             else:
                 column_status.append(f"Column {col}: FULL")
 

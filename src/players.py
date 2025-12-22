@@ -39,5 +39,16 @@ class AIPlayer(Player, ABC):
             format=self.response_schema,
             stream=False,
         )
-        move = json.loads(response.message.content)["move"]
-        return move
+
+        parsed = json.loads(response.message.content)
+
+        move = None
+        for key in ["move", "column", "position", "cell", "choice"]:
+            if key in parsed:
+                move = parsed[key]
+                break
+
+        if move is None:
+            raise KeyError(f"Model response missing valid key: {parsed}")
+
+        return str(move)

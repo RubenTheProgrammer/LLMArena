@@ -16,3 +16,5 @@ class GameRegistry:
     @classmethod
     def is_valid_game(cls, name):
         return name.lower() in cls._games
+
+
