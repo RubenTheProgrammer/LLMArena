@@ -5,7 +5,7 @@ class Game(ABC):
     def __init__(self, max_turns, player_color, board_size):
         self.max_turns = max_turns
         self.turn_count = 0
-        self.current_player = 2 if player_color == "black" else 1
+        self.current_player = 2 if player_color == "black" else 1 #specific rule for chess
         self.player_color = player_color
         self.board_status = self.initialize_game()
         self.board_size = board_size
