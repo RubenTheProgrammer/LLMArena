@@ -32,7 +32,7 @@ class TicTacToeGame(Game):
         bottom_row = " "
         letters = ["a", "b", "c"]
 
-        for j in range(3, 0, -1):
+        for j in range(self.board_size, 0, -1):
             cur_row = f"{j}  "
             for i in range(1, 4):
                 letter = letters[i - 1]
